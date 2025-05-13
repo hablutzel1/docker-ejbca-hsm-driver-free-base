@@ -1,4 +1,4 @@
-export PKCS11PROXY_SOCKET_PATH=${P11SERVER}:4444
+export PKCS11PROXY_SOCKET_PATH=${P11SERVER:-localhost}:4444
 
 # TODO instead of relying on 200 being always free, look for an available ID.
 caml_crush_conf_id=200
