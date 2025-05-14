@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+# Just ensuring the directory exists in case the path isn't mounted as a volume.
+mkdir -p /opt/caml-crush-client
 rm -rf /opt/caml-crush-client/*
 cp /tmp/base/libp11client.so /opt/caml-crush-client/libp11client.so
 sed "s/<HSM_PKCS11_LIBRARY_NAME>/${HSM_PKCS11_LIBRARY_NAME}/g" /tmp/base/environment-hsm.tpl > /opt/caml-crush-client/environment-hsm

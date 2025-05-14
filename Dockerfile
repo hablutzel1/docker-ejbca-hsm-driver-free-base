@@ -31,5 +31,6 @@ COPY start.sh /opt/bin/start.sh
 RUN chmod +x /opt/bin/start.sh
 ENTRYPOINT ["/opt/bin/start.sh"]
 
+# Note the following health check doesn't apply to K8s (https://stackoverflow.com/a/41476481/320594).
 # TODO It doesn't make sense to load EJBCA if the HSM is not ready!. Make this health check aware of the connectivity status to the HSM, e.g. with pkcs11-tool. An slot ID to be used to check connectivity could be required as an environment variable (e.g. HEALTHCHECK_SLOT_ID).
 HEALTHCHECK --interval=1s CMD ps -e | grep pkcs11proxyd | grep -v grep
