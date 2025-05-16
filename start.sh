@@ -23,6 +23,7 @@ if [ -z "${HSM_PKCS11_LIBRARY}" ]; then
     exit 1
 fi
 
+cp /tmp/base/pkcs11proxyd.conf /opt/caml-crush-server/pkcs11proxyd.conf
 sed -i 's/127.0.0.1:4444/0.0.0.0:4444/g' /opt/caml-crush-server/pkcs11proxyd.conf
 sed -i "64i\libnames=\":${HSM_PKCS11_LIBRARY};\";" /opt/caml-crush-server/pkcs11proxyd.conf
 

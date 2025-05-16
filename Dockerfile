@@ -19,7 +19,7 @@ RUN microdnf install -y procps
 WORKDIR /opt
 
 COPY --from=builder /caml-crush/src/pkcs11proxyd/pkcs11proxyd /opt/caml-crush-server/pkcs11proxyd
-COPY --from=builder /caml-crush/src/pkcs11proxyd/pkcs11proxyd.conf /opt/caml-crush-server/pkcs11proxyd.conf
+COPY --from=builder /caml-crush/src/pkcs11proxyd/pkcs11proxyd.conf /tmp/base/pkcs11proxyd.conf
 
 COPY --from=builder /caml-crush/src/client-lib/libp11client.so /tmp/base/libp11client.so
 
