@@ -2,7 +2,8 @@
 FROM debian:11 AS builder
 
 # TODO reduce to the minimum.
-RUN apt update && apt install -y autoconf make gcc git ocaml-nox camlidl coccinelle libocamlnet-ocaml-dev libocamlnet-ocaml-bin libconfig-file-ocaml-dev camlp4
+# Disable pipelining to prevent the errors mentioned in https://blobfishpe.atlassian.net/wiki/spaces/CFTECH/pages/704774149/apt-get+-+Networking#Disable-pipelining and observed during build operations in Rancher Desktop on macOS. Note that the cause for these errors wasn't identified.
+RUN apt update && apt -o Acquire::http::Pipeline-Depth=0 install -y autoconf make gcc git ocaml-nox camlidl coccinelle libocamlnet-ocaml-dev libocamlnet-ocaml-bin libconfig-file-ocaml-dev camlp4
 
 RUN git clone https://github.com/caml-pkcs11/caml-crush.git
 WORKDIR /caml-crush
