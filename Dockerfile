@@ -8,6 +8,10 @@ RUN apt update && apt -o Acquire::http::Pipeline-Depth=0 install -y autoconf mak
 RUN git clone https://github.com/caml-pkcs11/caml-crush.git
 WORKDIR /caml-crush
 RUN git checkout v1.0.12
+
+# To prevent the problem described in https://github.com/OpenSC/OpenSC/issues/2875#issuecomment-3330857445
+RUN sed -i 's|-Wl,-soname,$(CUSTOM_SONAME)|-Wl,-soname,$(CUSTOM_SONAME),-Bsymbolic|g' src/client-lib/Makefile.in
+
 RUN ./autogen.sh
 RUN ./configure --with-idlgen --with-rpcgen --with-daemonize --without-filter --with-libnames=""
 RUN make
