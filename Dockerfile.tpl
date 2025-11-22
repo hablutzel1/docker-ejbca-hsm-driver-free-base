@@ -1,4 +1,4 @@
-# TODO try to use AlmaLinux for building.
+# TODO try to use AlmaLinux for the builder for consistency
 FROM debian:11 AS builder
 
 # TODO reduce to the minimum.
@@ -17,7 +17,7 @@ RUN ./configure --with-idlgen --with-rpcgen --with-daemonize --without-filter --
 RUN make
 
 
-FROM almalinux:9-minimal
+FROM almalinux:{{ .almalinux }}-minimal
 
 RUN microdnf install -y procps
 

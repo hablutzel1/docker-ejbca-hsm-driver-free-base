@@ -2,15 +2,14 @@ name: Build and Publish Docker Image
 
 on:
   push:
-    # Sequence of patterns matched against refs/tags
     tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'v*'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/ejbca-hsm-driver-free-base
+  # TODO maybe obtain it from the GitHub repository name?
+  REPOSITORY: ejbca-hsm-driver-free-base
 
-# Use the GitHub token for authentication with GHCR
 jobs:
   build-and-push:
     name: Build and push Docker image
@@ -30,26 +29,32 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,format=long,prefix=,suffix=,enable=${{ github.event_name == 'push' && github.event.ref_type == 'tag' }}
+      - name: Extract version from tag
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Setup td
+        uses: tgagor/template-dockerfiles@main
+
+      - name: Create build.yaml for td
+        run: |
+          cat > build.yaml << 'EOF'
+          registry: ${{ env.REGISTRY }}
+          prefix: ${{ github.repository_owner }}
+          images:
+            image:
+              dockerfile: Dockerfile.tpl
+              context: .
+              variables:
+                almalinux:
+                  - "9"
+                  - "10"
+              tags:
+                - ${{ env.REPOSITORY }}:al{{ .almalinux }}
+                - ${{ env.REPOSITORY }}:{{ .tag }}-al{{ .almalinux }}
+                # TODO support a tag with only MAJOR.MINOR to allow for automatic adoption of patches.
+          EOF
+
+      # TODO check if it is possible to support https://docs.docker.com/build/cache/backends/gha/ for faster subsequent builds
+      - name: Build and push Docker image with td
+        run: td --config build.yaml --build --tag ${{ env.VERSION }} --push
