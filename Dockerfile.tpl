@@ -16,8 +16,8 @@ RUN ./autogen.sh
 RUN ./configure --with-idlgen --with-rpcgen --with-daemonize --without-filter --with-libnames=""
 RUN make
 
-
-FROM almalinux:{{ .almalinux }}-minimal
+# We are preferring these images delivered by AlmaLinux as the Official images (https://hub.docker.com/_/almalinux/) don't have an amd64/v2 image and we want to keep supporting that platform for AlmaLinux 10 (which now requires amd64/v3 by default). TODO determine why https://hub.docker.com/_/almalinux/ doesn't contain an amd64/v2 image. Explanation might be around https://github.com/docker-library/official-images#architectures-other-than-amd64
+FROM almalinux/{{ .almalinux }}-minimal:latest
 
 RUN microdnf install -y procps
 

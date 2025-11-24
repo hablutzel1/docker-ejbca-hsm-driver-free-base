@@ -41,6 +41,7 @@ jobs:
           cat > build.yaml << 'EOF'
           registry: ${{ env.REGISTRY }}
           prefix: ${{ github.repository_owner }}
+          # TODO fix the redundancy in the following image definitions.
           images:
             image:
               dockerfile: Dockerfile.tpl
@@ -48,13 +49,26 @@ jobs:
               variables:
                 almalinux:
                   - "9"
-                  - "10"
               tags:
                 - ${{ env.REPOSITORY }}:al{{ .almalinux }}
                 - ${{ env.REPOSITORY }}:{{ .tag }}-al{{ .almalinux }}
                 # TODO support a tag with only MAJOR.MINOR to allow for automatic adoption of patches.
+            # For AlmaLinux 10 we prefer amd64/v2 (instead of the default amd64/v3) to support older hardware.
+            image_amd64_v2:
+              dockerfile: Dockerfile.tpl
+              context: .
+              options:
+                - "--platform"
+                - "linux/amd64/v2"
+              variables:
+                almalinux:
+                  - "10"
+              tags:
+                - ${{ env.REPOSITORY }}:al{{ .almalinux }}
+                - ${{ env.REPOSITORY }}:{{ .tag }}-al{{ .almalinux }}
           EOF
 
+      # TODO for simplicity, evaluate to replace the td usage by direct `docker` calls. For that purpose define a matrix with info about the images to be built and iterate over it.
       # TODO check if it is possible to support https://docs.docker.com/build/cache/backends/gha/ for faster subsequent builds
       - name: Build and push Docker image with td
         run: td --config build.yaml --build --tag ${{ env.VERSION }} --push
